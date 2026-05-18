@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}HealthAI — AI Chatbot{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="ph-badge"><i class="bi bi-chat-dots"></i> AI Assistant</div>
+    <h1 class="ph-title">HealthAI Chatbot</h1>
+    <p class="ph-sub">Ask anything about diabetes, symptoms, diet, medications, or how this platform works</p>
+  </div>
+</div>
+
+<section class="chatbot-section">
+  <div class="container chat-layout">
+
+    <!-- ── SIDEBAR: QUICK TOPICS ── -->
+    <div class="chat-sidebar">
+      <div class="card sidebar-card">
+        <div class="sb-head"><i class="bi bi-lightning-fill"></i> Quick Topics</div>
+        <div class="quick-topics">
+          <button class="qtopic" data-msg="What is diabetes and how does it develop?">
+            <i class="bi bi-question-circle"></i> What is diabetes?
+          </button>
+          <button class="qtopic" data-msg="What are the symptoms of diabetes?">
+            <i class="bi bi-thermometer"></i> Symptoms
+          </button>
+          <button class="qtopic" data-msg="What foods should I eat or avoid for diabetes prevention?">
+            <i class="bi bi-egg-fried"></i> Diet & Nutrition
+          </button>
+          <button class="qtopic" data-msg="What exercises help prevent or manage diabetes?">
+            <i class="bi bi-bicycle"></i> Exercise Tips
+          </button>
+          <button class="qtopic" data-msg="What are normal blood glucose levels?">
+            <i class="bi bi-droplet-half"></i> Glucose Levels
+          </button>
+          <button class="qtopic" data-msg="How can I prevent type 2 diabetes?">
+            <i class="bi bi-shield-check"></i> Prevention
+          </button>
+          <button class="qtopic" data-msg="What is insulin resistance?">
+            <i class="bi bi-capsule"></i> Insulin Resistance
+          </button>
+          <button class="qtopic" data-msg="How accurate is this prediction model?">
+            <i class="bi bi-cpu"></i> Model Accuracy
+          </button>
+        </div>
+      </div>
+
+      <div class="card sidebar-card sidebar-info">
+        <div class="sb-head"><i class="bi bi-info-circle"></i> About HealthAI</div>
+        <ul class="sb-info-list">
+          <li><i class="bi bi-check-circle"></i> Diabetes specialist AI</li>
+          <li><i class="bi bi-check-circle"></i> Evidence-based answers</li>
+          <li><i class="bi bi-check-circle"></i> Available 24/7</li>
+          <li><i class="bi bi-exclamation-triangle"></i> Not a medical diagnosis</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── MAIN CHAT WINDOW ── -->
+    <div class="chat-main">
+      <div class="card chat-window">
+
+        <!-- Chat header -->
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <i class="bi bi-heart-pulse-fill"></i>
+          </div>
+          <div class="chat-agent-info">
+            <strong>HealthAI Assistant</strong>
+            <span class="chat-status"><i class="bi bi-circle-fill"></i> Online</span>
+          </div>
+          <button class="btn-clear-chat" id="clearChat" title="Clear conversation">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+
+        <!-- Messages area -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Welcome message -->
+          <div class="chat-msg bot-msg">
+            <div class="msg-avatar"><i class="bi bi-heart-pulse-fill"></i></div>
+            <div class="msg-bubble">
+              <p>👋 Hello! I'm <strong>HealthAI</strong>, your diabetes and metabolic health assistant.</p>
+              <p>I can answer questions about:</p>
+              <ul>
+                <li>🩸 Diabetes symptoms, types, and diagnosis</li>
+                <li>🥗 Diet, nutrition, and lifestyle changes</li>
+                <li>🏃 Exercise and weight management</li>
+                <li>💊 Medications and treatment options</li>
+                <li>📊 How this prediction platform works</li>
+              </ul>
+              <p>What would you like to know?</p>
+              <span class="msg-time">Just now</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing indicator (hidden) -->
+        <div class="typing-indicator hidden" id="typingIndicator">
+          <div class="msg-avatar"><i class="bi bi-heart-pulse-fill"></i></div>
+          <div class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Input bar -->
+        <div class="chat-input-bar">
+          <textarea
+            id="chatInput"
+            class="chat-textarea"
+            placeholder="Ask me about diabetes, diet, exercise, glucose levels…"
+            rows="1"
+            maxlength="500"
+          ></textarea>
+          <button class="btn-send" id="sendBtn" aria-label="Send message">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+
+        <div class="chat-footer-note">
+          <i class="bi bi-shield-exclamation"></i>
+          HealthAI provides general health information only — not medical advice. Always consult a doctor.
+        </div>
+
+      </div><!-- /chat-window -->
+    </div><!-- /chat-main -->
+
+  </div><!-- /chat-layout -->
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+{% endblock %}

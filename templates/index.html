@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}HealthAI — Home{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  <div class="container hero-content">
+    <div class="hero-text">
+      <div class="hero-badge animate-in" style="--delay:0.1s">
+        <i class="bi bi-stars"></i> AI-Powered Healthcare Platform
+      </div>
+      <h1 class="hero-title animate-in" style="--delay:0.2s">
+        Predict Diabetes Risk<br/>
+        <span class="gradient-text">Before It Happens</span>
+      </h1>
+      <p class="hero-desc animate-in" style="--delay:0.3s">
+        Enter your health data and receive an instant diabetes risk assessment powered by
+        a <strong>Random Forest ML model</strong> with 91% accuracy — plus personalized
+        AI recommendations and analytics dashboard.
+      </p>
+      <div class="hero-cta animate-in" style="--delay:0.4s">
+        <a href="{{ url_for('prediction') }}" class="btn btn-primary btn-lg">
+          <i class="bi bi-activity"></i> Start Prediction
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-lg">
+          <i class="bi bi-bar-chart-line"></i> View Analytics
+        </a>
+      </div>
+      <div class="hero-disclaimer animate-in" style="--delay:0.5s">
+        <i class="bi bi-shield-check"></i>
+        For educational use only — not a medical diagnosis tool
+      </div>
+    </div>
+    <div class="hero-visual animate-in" style="--delay:0.3s">
+      <div class="health-card-3d">
+        <div class="hc-header">
+          <span class="hc-dot red"></span>
+          <span class="hc-dot yellow"></span>
+          <span class="hc-dot green"></span>
+          <span class="hc-title">Risk Analysis</span>
+        </div>
+        <div class="hc-body">
+          <div class="hc-gauge">
+            <svg viewBox="0 0 120 80" class="gauge-svg">
+              <path d="M10,70 A55,55 0 0,1 110,70" stroke="#E8EDF2" stroke-width="10" fill="none"/>
+              <path d="M10,70 A55,55 0 0,1 110,70" stroke="url(#gGrad)" stroke-width="10"
+                    fill="none" stroke-dasharray="173" stroke-dashoffset="90"
+                    stroke-linecap="round" class="gauge-arc"/>
+              <defs>
+                <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#58D68D"/>
+                  <stop offset="50%" stop-color="#F39C12"/>
+                  <stop offset="100%" stop-color="#E74C3C"/>
+                </linearGradient>
+              </defs>
+              <text x="60" y="68" text-anchor="middle" class="gauge-val">28%</text>
+              <text x="60" y="78" text-anchor="middle" class="gauge-label">Risk Score</text>
+            </svg>
+          </div>
+          <div class="hc-metrics">
+            <div class="hc-metric">
+              <span class="hc-m-label">Glucose</span>
+              <div class="hc-m-bar"><div class="hc-m-fill" style="width:55%;background:#2E86C1"></div></div>
+              <span class="hc-m-val">105</span>
+            </div>
+            <div class="hc-metric">
+              <span class="hc-m-label">BMI</span>
+              <div class="hc-m-bar"><div class="hc-m-fill" style="width:40%;background:#58D68D"></div></div>
+              <span class="hc-m-val">23.4</span>
+            </div>
+            <div class="hc-metric">
+              <span class="hc-m-label">Insulin</span>
+              <div class="hc-m-bar"><div class="hc-m-fill" style="width:30%;background:#9B59B6"></div></div>
+              <span class="hc-m-val">82</span>
+            </div>
+          </div>
+          <div class="hc-status low">
+            <i class="bi bi-check-circle-fill"></i> Low Risk — Stay Healthy!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     STATS BAR
+══════════════════════════════════════════════════ -->
+<section class="stats-bar">
+  <div class="container stats-grid">
+    <div class="stat-item">
+      <span class="stat-num">{{ stats.dataset_stats.total_records }}</span>
+      <span class="stat-desc">Training Records</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">{{ (stats.metrics.accuracy * 100)|round(1) }}%</span>
+      <span class="stat-desc">Model Accuracy</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">{{ (stats.metrics.f1 * 100)|round(1) }}%</span>
+      <span class="stat-desc">F1 Score</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">{{ stats.model_name.split()[0] }}</span>
+      <span class="stat-desc">Best Algorithm</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">8</span>
+      <span class="stat-desc">Health Features</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     FEATURE CARDS
+══════════════════════════════════════════════════ -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What This Platform Does</h2>
+      <p class="section-sub">A complete end-to-end healthcare AI system</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" style="--accent:#2E86C1">
+        <div class="fc-icon"><i class="bi bi-activity"></i></div>
+        <h3>Diabetes Risk Prediction</h3>
+        <p>Input 8 clinical health metrics and receive an instant probability score (0–100%) powered by a tuned Random Forest model.</p>
+        <a href="{{ url_for('prediction') }}" class="fc-link">Try Prediction <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card" style="--accent:#58D68D">
+        <div class="fc-icon"><i class="bi bi-heart-pulse"></i></div>
+        <h3>Health Score Calculator</h3>
+        <p>Get your personal Health Score (0–100) derived from prediction probability. Higher score = better metabolic health.</p>
+        <a href="{{ url_for('prediction') }}" class="fc-link">Check Score <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card" style="--accent:#9B59B6">
+        <div class="fc-icon"><i class="bi bi-lightbulb"></i></div>
+        <h3>AI Recommendations</h3>
+        <p>Rule-based AI engine generates personalized lifestyle advice based on your glucose, BMI, age, and insulin levels.</p>
+        <a href="{{ url_for('prediction') }}" class="fc-link">Get Advice <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card" style="--accent:#E67E22">
+        <div class="fc-icon"><i class="bi bi-bar-chart-line"></i></div>
+        <h3>Analytics Dashboard</h3>
+        <p>Interactive Chart.js visualizations: glucose distribution, BMI trends, risk category breakdown, and model performance metrics.</p>
+        <a href="{{ url_for('dashboard') }}" class="fc-link">View Charts <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card" style="--accent:#E74C3C">
+        <div class="fc-icon"><i class="bi bi-chat-dots"></i></div>
+        <h3>AI Health Chatbot</h3>
+        <p>Ask our HealthAI chatbot anything about diabetes, symptoms, diet, exercise, medications, or how the platform works.</p>
+        <a href="{{ url_for('chatbot') }}" class="fc-link">Chat Now <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="feature-card" style="--accent:#1ABC9C">
+        <div class="fc-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <h3>Model Explainability</h3>
+        <p>See which health factors contributed most to your risk score. Feature importance bars help you understand the AI's reasoning.</p>
+        <a href="{{ url_for('prediction') }}" class="fc-link">See Factors <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════════════ -->
+<section class="how-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">Three simple steps to your health assessment</p>
+    </div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon"><i class="bi bi-clipboard-data"></i></div>
+        <h3>Enter Health Data</h3>
+        <p>Input your glucose, BMI, age, blood pressure, insulin, and other clinical measurements into the prediction form.</p>
+      </div>
+      <div class="step-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon"><i class="bi bi-cpu"></i></div>
+        <h3>AI Analyzes</h3>
+        <p>Our Random Forest model processes your data using 11 features including engineered variables for higher accuracy.</p>
+      </div>
+      <div class="step-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon"><i class="bi bi-clipboard-check"></i></div>
+        <h3>Get Results</h3>
+        <p>Receive your risk percentage, health score, risk category (Low / Medium / High), and personalized recommendations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     DATASET COLUMNS EXPLAINED
+══════════════════════════════════════════════════ -->
+<section class="columns-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Understanding the Health Parameters</h2>
+      <p class="section-sub">What each input field means and why it matters</p>
+    </div>
+    <div class="columns-grid">
+      {% set cols = [
+        ('bi-droplet','Pregnancies','Number of times pregnant','Higher pregnancies increase gestational diabetes risk'),
+        ('bi-droplet-half','Glucose','Plasma glucose (mg/dL)','Primary predictor — normal range 70–99 mg/dL'),
+        ('bi-heart','Blood Pressure','Diastolic BP (mmHg)','Hypertension linked to insulin resistance'),
+        ('bi-layers','Skin Thickness','Triceps fold (mm)','Proxy for body fat percentage'),
+        ('bi-capsule','Insulin','2-hour serum insulin (μU/ml)','Elevated levels indicate insulin resistance'),
+        ('bi-person','BMI','Body Mass Index (kg/m²)','Obesity is the strongest modifiable risk factor'),
+        ('bi-diagram-3','DPF','Diabetes Pedigree Function','Genetic predisposition score from family history'),
+        ('bi-calendar','Age','Age in years','Risk increases significantly after 45'),
+      ] %}
+      {% for icon, name, unit, desc in cols %}
+      <div class="col-card">
+        <div class="col-icon"><i class="bi {{ icon }}"></i></div>
+        <div class="col-info">
+          <strong>{{ name }}</strong>
+          <span class="col-unit">{{ unit }}</span>
+          <p>{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

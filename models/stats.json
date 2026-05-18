@@ -1,0 +1,52 @@
+{
+  "model_name": "Random Forest",
+  "metrics": {
+    "accuracy": 0.8377,
+    "precision": 0.84,
+    "recall": 0.9921,
+    "f1": 0.9097,
+    "cv_mean": 0.9083,
+    "cv_std": 0.019
+  },
+  "feature_importance": {
+    "Glucose": 0.2552,
+    "BMI": 0.1447,
+    "GlucosePerBMI": 0.1028,
+    "AgeRiskScore": 0.0948,
+    "Insulin": 0.0814,
+    "Age": 0.0797,
+    "InsulinEfficiency": 0.0672,
+    "SkinThickness": 0.0567,
+    "DiabetesPedigreeFunction": 0.0421,
+    "Pregnancies": 0.0403,
+    "BloodPressure": 0.0351
+  },
+  "all_results": {
+    "Logistic Regression": {
+      "acc": 0.8117,
+      "prec": 0.8356,
+      "rec": 0.9606,
+      "f1": 0.8938
+    },
+    "Random Forest": {
+      "acc": 0.8377,
+      "prec": 0.84,
+      "rec": 0.9921,
+      "f1": 0.9097
+    },
+    "XGBoost": {
+      "acc": 0.8052,
+      "prec": 0.8299,
+      "rec": 0.9606,
+      "f1": 0.8905
+    }
+  },
+  "dataset_stats": {
+    "total_records": 768,
+    "diabetic": 633,
+    "non_diabetic": 135,
+    "avg_glucose": 122.4,
+    "avg_bmi": 32.3,
+    "avg_age": 51.5
+  }
+}

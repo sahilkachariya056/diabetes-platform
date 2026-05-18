@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}HealthAI — Risk Prediction{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="ph-badge"><i class="bi bi-activity"></i> ML Powered</div>
+    <h1 class="ph-title">Diabetes Risk Prediction</h1>
+    <p class="ph-sub">Enter your clinical health data below for an instant AI-powered risk assessment</p>
+  </div>
+</div>
+
+<section class="prediction-section">
+  <div class="container pred-layout">
+
+    <!-- ── LEFT: INPUT FORM ── -->
+    <div class="pred-form-wrap">
+      <div class="card form-card">
+        <div class="card-head">
+          <i class="bi bi-clipboard-data"></i>
+          <span>Patient Health Data</span>
+          <button class="btn-demo" id="fillDemo" title="Fill with demo values">
+            <i class="bi bi-magic"></i> Demo
+          </button>
+        </div>
+
+        <form id="predForm" novalidate>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="Pregnancies">
+                <i class="bi bi-droplet"></i> Pregnancies
+                <span class="info-tip" data-tip="Number of times pregnant (0–17)">?</span>
+              </label>
+              <input type="number" id="Pregnancies" name="Pregnancies"
+                     min="0" max="17" placeholder="e.g. 2" required/>
+              <span class="range-hint">Range: 0 – 17</span>
+            </div>
+
+            <div class="form-group">
+              <label for="Glucose">
+                <i class="bi bi-droplet-half"></i> Glucose (mg/dL)
+                <span class="info-tip" data-tip="Plasma glucose concentration (70–199)">?</span>
+              </label>
+              <input type="number" id="Glucose" name="Glucose"
+                     min="44" max="199" placeholder="e.g. 120" required/>
+              <span class="range-hint">Normal: 70–99 · Pre: 100–125 · Diabetic: 126+</span>
+            </div>
+
+            <div class="form-group">
+              <label for="BloodPressure">
+                <i class="bi bi-heart"></i> Blood Pressure (mmHg)
+                <span class="info-tip" data-tip="Diastolic blood pressure (24–122)">?</span>
+              </label>
+              <input type="number" id="BloodPressure" name="BloodPressure"
+                     min="24" max="122" placeholder="e.g. 72" required/>
+              <span class="range-hint">Normal diastolic: 60–80 mmHg</span>
+            </div>
+
+            <div class="form-group">
+              <label for="SkinThickness">
+                <i class="bi bi-layers"></i> Skin Thickness (mm)
+                <span class="info-tip" data-tip="Triceps skinfold thickness (0–99)">?</span>
+              </label>
+              <input type="number" id="SkinThickness" name="SkinThickness"
+                     min="0" max="99" placeholder="e.g. 29" required/>
+              <span class="range-hint">Typical range: 10–50 mm</span>
+            </div>
+
+            <div class="form-group">
+              <label for="Insulin">
+                <i class="bi bi-capsule"></i> Insulin (μU/mL)
+                <span class="info-tip" data-tip="2-hour serum insulin (0–846)">?</span>
+              </label>
+              <input type="number" id="Insulin" name="Insulin"
+                     min="0" max="846" placeholder="e.g. 80" required/>
+              <span class="range-hint">Normal fasting: 2–25 μU/mL</span>
+            </div>
+
+            <div class="form-group">
+              <label for="BMI">
+                <i class="bi bi-person"></i> BMI (kg/m²)
+                <span class="info-tip" data-tip="Body Mass Index (18–67). Formula: kg/m²">?</span>
+              </label>
+              <input type="number" id="BMI" name="BMI" step="0.1"
+                     min="10" max="67" placeholder="e.g. 25.5" required/>
+              <span class="range-hint">Healthy: 18.5–24.9 · Overweight: 25–29.9 · Obese: 30+</span>
+            </div>
+
+            <div class="form-group">
+              <label for="DiabetesPedigreeFunction">
+                <i class="bi bi-diagram-3"></i> Diabetes Pedigree
+                <span class="info-tip" data-tip="Genetic risk score based on family history (0.078–2.42)">?</span>
+              </label>
+              <input type="number" id="DiabetesPedigreeFunction" name="DiabetesPedigreeFunction"
+                     step="0.001" min="0.078" max="2.42" placeholder="e.g. 0.47" required/>
+              <span class="range-hint">Range: 0.078 – 2.42 (higher = more family risk)</span>
+            </div>
+
+            <div class="form-group">
+              <label for="Age">
+                <i class="bi bi-calendar"></i> Age (years)
+                <span class="info-tip" data-tip="Age in years (21–80)">?</span>
+              </label>
+              <input type="number" id="Age" name="Age"
+                     min="21" max="80" placeholder="e.g. 35" required/>
+              <span class="range-hint">Risk increases significantly after age 45</span>
+            </div>
+
+          </div><!-- /form-grid -->
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-xl" id="predictBtn">
+              <i class="bi bi-cpu"></i> Analyze Risk Now
+            </button>
+            <button type="reset" class="btn btn-ghost" id="resetBtn">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </button>
+          </div>
+
+        </form>
+      </div><!-- /form-card -->
+    </div><!-- /pred-form-wrap -->
+
+    <!-- ── RIGHT: RESULTS ── -->
+    <div class="pred-results-wrap" id="resultsPanel">
+
+      <!-- Placeholder before prediction -->
+      <div class="results-placeholder" id="placeholder">
+        <div class="placeholder-icon"><i class="bi bi-activity"></i></div>
+        <h3>Your Results Appear Here</h3>
+        <p>Fill in your health data on the left and click <strong>Analyze Risk Now</strong> to get your personalized diabetes risk assessment.</p>
+      </div>
+
+      <!-- Loading spinner -->
+      <div class="results-loading hidden" id="loadingSpinner">
+        <div class="spinner-ring"></div>
+        <p>Analyzing your health data…</p>
+      </div>
+
+      <!-- Actual results (hidden until API returns) -->
+      <div class="results-content hidden" id="resultsContent">
+
+        <!-- Risk Score Card -->
+        <div class="card result-card risk-card" id="riskCard">
+          <div class="risk-top">
+            <div class="risk-gauge-wrap">
+              <svg class="risk-gauge" viewBox="0 0 160 100">
+                <path d="M15,90 A65,65 0 0,1 145,90" stroke="#E8EDF2" stroke-width="12" fill="none"/>
+                <path id="gaugeArc" d="M15,90 A65,65 0 0,1 145,90"
+                      stroke="#27AE60" stroke-width="12" fill="none"
+                      stroke-dasharray="204" stroke-dashoffset="204"
+                      stroke-linecap="round"/>
+                <text id="gaugeText" x="80" y="84" text-anchor="middle" class="gauge-pct">0%</text>
+                <text x="80" y="96" text-anchor="middle" class="gauge-lbl">Risk</text>
+              </svg>
+            </div>
+            <div class="risk-meta">
+              <div class="risk-badge" id="riskBadge">—</div>
+              <div class="risk-label">Risk Level</div>
+              <div class="health-score-wrap">
+                <div class="hs-label">Health Score</div>
+                <div class="hs-value" id="healthScore">—</div>
+                <div class="hs-bar-track"><div class="hs-bar-fill" id="hsFill"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="risk-model-tag" id="modelTag">—</div>
+        </div>
+
+        <!-- Top Factors (Explainability) -->
+        <div class="card result-card factors-card">
+          <div class="card-head">
+            <i class="bi bi-graph-up"></i> Key Risk Factors
+          </div>
+          <div class="factors-list" id="factorsList"></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card result-card recs-card">
+          <div class="card-head">
+            <i class="bi bi-lightbulb"></i> Personalized Recommendations
+          </div>
+          <div class="recs-list" id="recsList"></div>
+        </div>
+
+        <!-- Share / Chat CTA -->
+        <div class="result-actions">
+          <button class="btn btn-outline" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print Report
+          </button>
+          <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
+            <i class="bi bi-chat-dots"></i> Ask HealthAI
+          </a>
+        </div>
+
+      </div><!-- /results-content -->
+    </div><!-- /pred-results-wrap -->
+
+  </div><!-- /pred-layout -->
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+{% endblock %}

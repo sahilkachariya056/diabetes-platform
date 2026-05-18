@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}HealthAI — Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="ph-badge"><i class="bi bi-bar-chart-line"></i> Live Analytics</div>
+    <h1 class="ph-title">Healthcare Analytics Dashboard</h1>
+    <p class="ph-sub">Dataset statistics, model performance, and risk distribution visualized</p>
+  </div>
+</div>
+
+<section class="dashboard-section">
+  <div class="container">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--accent:#2E86C1">
+        <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num" id="kpiTotal">{{ stats.dataset_stats.total_records }}</div>
+          <div class="kpi-label">Total Records</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent:#E74C3C">
+        <div class="kpi-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num" id="kpiDiabetic">{{ stats.dataset_stats.diabetic }}</div>
+          <div class="kpi-label">Diabetic Cases</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent:#27AE60">
+        <div class="kpi-icon"><i class="bi bi-shield-check"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num" id="kpiHealthy">{{ stats.dataset_stats.non_diabetic }}</div>
+          <div class="kpi-label">Non-Diabetic</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent:#9B59B6">
+        <div class="kpi-icon"><i class="bi bi-trophy-fill"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num">{{ (stats.metrics.accuracy * 100)|round(1) }}%</div>
+          <div class="kpi-label">Model Accuracy</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent:#E67E22">
+        <div class="kpi-icon"><i class="bi bi-bullseye"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num">{{ (stats.metrics.f1 * 100)|round(1) }}%</div>
+          <div class="kpi-label">F1 Score</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="--accent:#1ABC9C">
+        <div class="kpi-icon"><i class="bi bi-cpu-fill"></i></div>
+        <div class="kpi-info">
+          <div class="kpi-num">{{ stats.model_name.split()[0] }}</div>
+          <div class="kpi-label">Best Model</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <div class="charts-row">
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h3><i class="bi bi-pie-chart-fill"></i> Outcome Distribution</h3>
+          <span class="chart-tag">Dataset</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="outcomeChart"></canvas>
+        </div>
+        <div class="chart-insight">
+          <i class="bi bi-info-circle"></i>
+          {{ ((stats.dataset_stats.diabetic / stats.dataset_stats.total_records) * 100)|round(1) }}%
+          of the dataset are diabetic cases — a realistic class imbalance.
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h3><i class="bi bi-bar-chart-fill"></i> Risk Category Breakdown</h3>
+          <span class="chart-tag">Predicted</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="riskChart"></canvas>
+        </div>
+        <div class="chart-insight">
+          <i class="bi bi-info-circle"></i>
+          Estimated distribution based on model probability thresholds (&lt;30% Low, 30–60% Medium, 60%+ High).
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 2 -->
+    <div class="charts-row">
+      <div class="card chart-card chart-wide">
+        <div class="chart-head">
+          <h3><i class="bi bi-graph-up"></i> Glucose Level Distribution</h3>
+          <span class="chart-tag">Clinical Data</span>
+        </div>
+        <div class="chart-body chart-tall">
+          <canvas id="glucoseChart"></canvas>
+        </div>
+        <div class="chart-insight">
+          <i class="bi bi-info-circle"></i>
+          Glucose is the single strongest predictor. Levels above 126 mg/dL indicate diabetic range.
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW 3 -->
+    <div class="charts-row">
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h3><i class="bi bi-bar-chart-steps"></i> BMI Distribution</h3>
+          <span class="chart-tag">Body Composition</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="bmiChart"></canvas>
+        </div>
+        <div class="chart-insight">
+          <i class="bi bi-info-circle"></i>
+          Avg BMI: {{ stats.dataset_stats.avg_bmi }}. BMI &gt;30 (Obese) significantly raises diabetes risk.
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h3><i class="bi bi-person-badge"></i> Age Distribution</h3>
+          <span class="chart-tag">Demographics</span>
+        </div>
+        <div class="chart-body">
+          <canvas id="ageChart"></canvas>
+        </div>
+        <div class="chart-insight">
+          <i class="bi bi-info-circle"></i>
+          Avg age: {{ stats.dataset_stats.avg_age }} years. Diabetes risk rises sharply after 45.
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL PERFORMANCE -->
+    <div class="card chart-card chart-wide">
+      <div class="chart-head">
+        <h3><i class="bi bi-graph-up-arrow"></i> Model Comparison — All Metrics</h3>
+        <span class="chart-tag">ML Evaluation</span>
+      </div>
+      <div class="chart-body chart-tall">
+        <canvas id="modelChart"></canvas>
+      </div>
+      <div class="chart-insight">
+        <i class="bi bi-info-circle"></i>
+        Random Forest achieved the highest F1 score after GridSearchCV hyperparameter tuning.
+      </div>
+    </div>
+
+    <!-- FEATURE IMPORTANCE -->
+    <div class="card chart-card chart-wide">
+      <div class="chart-head">
+        <h3><i class="bi bi-diagram-3"></i> Feature Importance</h3>
+        <span class="chart-tag">Model Explainability</span>
+      </div>
+      <div class="chart-body chart-tall">
+        <canvas id="featureChart"></canvas>
+      </div>
+      <div class="chart-insight">
+        <i class="bi bi-info-circle"></i>
+        Features ranked by their contribution to the model's predictions.
+        Glucose, BMI, and Age are typically most important.
+      </div>
+    </div>
+
+    <!-- METRICS TABLE -->
+    <div class="card metrics-table-card">
+      <div class="chart-head">
+        <h3><i class="bi bi-table"></i> Detailed Model Performance Metrics</h3>
+        <span class="chart-tag">Evaluation Report</span>
+      </div>
+      <div class="table-wrap">
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1 Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="metricsTableBody">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</section>
+
+<!-- Pass stats to JS -->
+<script>
+  const DASHBOARD_STATS = {{ stats | tojson }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
