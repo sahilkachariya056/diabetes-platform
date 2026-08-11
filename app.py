@@ -14,16 +14,14 @@ from openai import OpenAI
 # Load environment variables
 load_dotenv()
 
+# Create Flask app
+app = Flask(__name__)
+
 # OpenAI client
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
-app = Flask(__name__)
-
-load_dotenv()
-
-app = Flask(__name__)
 
 # ─────────────────────────────────────────────────────────────
 # LOAD MODEL BUNDLE
