@@ -386,7 +386,7 @@ def chat():
             try:
                 # Send user's question to Gemini
                 response = client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='gemini-3.5-flash-lite',
                     contents=f"""
 You are HealthAI, a friendly and professional healthcare assistant
 specializing in diabetes prevention, management, and general
