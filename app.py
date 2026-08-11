@@ -9,7 +9,7 @@ import pickle
 import numpy as np
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from openai import OpenAI
+from google import genai
 
 # Load environment variables
 load_dotenv()
@@ -17,11 +17,10 @@ load_dotenv()
 # Create Flask app
 app = Flask(__name__)
 
-# OpenAI client
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+# Gemini client
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
-
 
 # ─────────────────────────────────────────────────────────────
 # LOAD MODEL BUNDLE
@@ -333,34 +332,57 @@ def chat():
         if not message:
             return jsonify({'error': 'Empty message'}), 400
 
-        # Try OpenAI if API key is set, else fall back to rule-based
-        api_key = os.getenv('OPENAI_API_KEY', '')
-        if api_key and api_key.startswith('sk-'):
-            try:
-                from openai import OpenAI
-                client = OpenAI(api_key=api_key)
-                resp = client.chat.completions.create(
-                    model='gpt-4o-mini',
-                    messages=[
-                        {'role': 'system', 'content': (
-                            'You are HealthAI, a friendly and professional healthcare assistant '
-                            'specializing in diabetes prevention, management, and general metabolic health. '
-                            'Provide safe, evidence-based, and easy-to-understand advice. '
-                            'Always remind users to consult a doctor for medical decisions. '
-                            'Keep responses concise and empathetic.'
-                        )},
-                        {'role': 'user', 'content': message}
-                    ],
-                    max_tokens=300,
-                    temperature=0.7,
-                )
-                reply = resp.choices[0].message.content
-                return jsonify({'reply': reply, 'source': 'ai'})
-            except Exception:
-                pass
+        # Try gemini if API key is set, else fall back to rule-based
+        @app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.get_json()
+        message = data.get('message', '').strip()
 
+        if not message:
+            return jsonify({'error': 'Empty message'}), 400
+
+        # Try Gemini if API key is available
+        api_key = os.getenv('GEMINI_API_KEY', '')
+
+        if api_key:
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=f"""
+You are HealthAI, a friendly and professional healthcare assistant
+specializing in diabetes prevention, management, and general
+metabolic health.
+
+Provide safe, evidence-based, easy-to-understand advice.
+
+Always remind users to consult a qualified doctor for medical
+decisions.
+
+Keep responses concise and empathetic.
+
+User question:
+{message}
+"""
+                )
+
+                reply = response.text
+
+                return jsonify({
+                    'reply': reply,
+                    'source': 'gemini'
+                })
+
+            except Exception as e:
+                print("Gemini API error:", e)
+
+        # Fallback to rule-based chatbot
         reply = rule_based_chat(message)
-        return jsonify({'reply': reply, 'source': 'rules'})
+
+        return jsonify({
+            'reply': reply,
+            'source': 'rules'
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
