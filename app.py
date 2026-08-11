@@ -11,16 +11,47 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from google import genai
 
-# Load environment variables
+"""
+app.py — Flask Backend for Diabetes Prediction Platform
+PHASES 6, 7, 8, 12, 14
+"""
+
+import os
+import json
+import pickle
+import numpy as np
+
+from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
+from google import genai
+
+
+# ─────────────────────────────────────────────────────────────
+# LOAD ENVIRONMENT VARIABLES
+# ─────────────────────────────────────────────────────────────
+
 load_dotenv()
 
-# Create Flask app
+
+# ─────────────────────────────────────────────────────────────
+# CREATE FLASK APPLICATION
+# ─────────────────────────────────────────────────────────────
+
 app = Flask(__name__)
 
-# Gemini client
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+
+# ─────────────────────────────────────────────────────────────
+# GEMINI AI CLIENT
+# ─────────────────────────────────────────────────────────────
+
+# Get Gemini API key from environment variable
+api_key = os.getenv("GEMINI_API_KEY")
+
+# Create Gemini client only if API key exists
+if api_key:
+    client = genai.Client(api_key=api_key)
+else:
+    client = None
 
 # ─────────────────────────────────────────────────────────────
 # LOAD MODEL BUNDLE
@@ -324,40 +355,49 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 
+# ─────────────────────────────────────────────────────────────
+# GEMINI AI CHATBOT
+# ─────────────────────────────────────────────────────────────
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
-        data    = request.get_json()
-        message = data.get('message', '').strip()
-        if not message:
-            return jsonify({'error': 'Empty message'}), 400
-
-        # Try gemini if API key is set, else fall back to rule-based
-        @app.route('/chat', methods=['POST'])
-def chat():
-    try:
+        # Get JSON data from the frontend
         data = request.get_json()
+
+        # Get user's message
         message = data.get('message', '').strip()
 
+        # Check if message is empty
         if not message:
-            return jsonify({'error': 'Empty message'}), 400
+            return jsonify({
+                'error': 'Empty message'
+            }), 400
 
-        # Try Gemini if API key is available
+        # ─────────────────────────────────────────────────────
+        # TRY GEMINI AI
+        # ─────────────────────────────────────────────────────
+
+        # Get Gemini API key from environment variable
         api_key = os.getenv('GEMINI_API_KEY', '')
 
-        if api_key:
+        # Check if Gemini API key and client are available
+        if api_key and client:
+
             try:
+                # Send user's question to Gemini
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model='gemini-2.5-flash',
                     contents=f"""
 You are HealthAI, a friendly and professional healthcare assistant
 specializing in diabetes prevention, management, and general
 metabolic health.
 
-Provide safe, evidence-based, easy-to-understand advice.
+Provide safe, evidence-based and easy-to-understand information.
 
-Always remind users to consult a qualified doctor for medical
-decisions.
+Always remind users to consult a qualified healthcare professional
+for medical decisions.
+
+Do not diagnose diseases or prescribe medication.
 
 Keep responses concise and empathetic.
 
@@ -366,17 +406,25 @@ User question:
 """
                 )
 
+                # Get Gemini's text response
                 reply = response.text
 
+                # Send Gemini response to frontend
                 return jsonify({
                     'reply': reply,
                     'source': 'gemini'
                 })
 
             except Exception as e:
-                print("Gemini API error:", e)
+                # Print Gemini error for debugging
+                print("Gemini API Error:", e)
 
-        # Fallback to rule-based chatbot
+        # ─────────────────────────────────────────────────────
+        # FALLBACK TO RULE-BASED CHATBOT
+        # ─────────────────────────────────────────────────────
+
+        # If Gemini is unavailable or fails,
+        # use the predefined rule-based chatbot.
         reply = rule_based_chat(message)
 
         return jsonify({
@@ -385,12 +433,10 @@ User question:
         })
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/stats')
-def api_stats():
-    return jsonify(STATS)
+        # Handle unexpected errors
+        return jsonify({
+            'error': str(e)
+        }), 500
 
 
 if __name__ == '__main__':
