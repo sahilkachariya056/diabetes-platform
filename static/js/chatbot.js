@@ -108,40 +108,83 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ── Send message ── */
-  async function sendMessage() {
-    const text = chatInput.value.trim();
-    if (!text) return;
+async function sendMessage() {
+  const text = chatInput.value.trim();
 
-    // Append user message
-    appendMessage('user', text);
-    chatInput.value = '';
-    chatInput.style.height = 'auto';
-    sendBtn.disabled = true;
-    showTyping();
+  // Don't send empty messages
+  if (!text) return;
 
-    try {
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
+  // Display user's message
+  appendMessage('user', text);
 
-      const data = await res.json();
-      hideTyping();
+  // Clear input
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
 
-      if (data.error) throw new Error(data.error);
-      appendMessage('bot', data.reply);
+  // Disable send button while waiting
+  sendBtn.disabled = true;
 
-    } catch (err) {
-      hideTyping();
-      appendMessage('bot',
-        "I'm having trouble connecting right now. Please try again in a moment! " +
-        "If you have a medical emergency, please contact a healthcare professional immediately."
-      );
-    } finally {
-      sendBtn.disabled = false;
-      chatInput.focus();
+  // Show typing animation
+  showTyping();
+
+  try {
+
+    // Send message to Flask backend
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: text
+      })
+    });
+
+    // Check HTTP status
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
     }
+
+    // Convert response to JSON
+    const data = await res.json();
+
+    // Hide typing animation
+    hideTyping();
+
+    // Check backend error
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Display Gemini/rule-based response
+    appendMessage('bot', data.reply);
+
+    // Optional: useful for debugging
+    console.log('Chatbot source:', data.source);
+
+  } catch (err) {
+
+    // Print actual error in browser console
+    console.error('Chatbot error:', err);
+
+    // Hide typing animation
+    hideTyping();
+
+    // Display friendly error to user
+    appendMessage(
+      'bot',
+      "I'm having trouble connecting right now. Please try again in a moment! " +
+      "If you have a medical emergency, please contact a healthcare professional immediately."
+    );
+
+  } finally {
+
+    // Re-enable send button
+    sendBtn.disabled = false;
+
+    // Put cursor back in input
+    chatInput.focus();
   }
+}
 
 });
